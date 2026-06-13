@@ -175,18 +175,13 @@
         <div class="split">
           <label>
             <span>Folder</span>
-            <input name="folder" type="text" placeholder="wallpapers" />
+            <input name="folder" type="text" placeholder="wallpapers/nature" />
           </label>
           <label>
             <span>Public ID</span>
             <input name="publicId" type="text" placeholder="optional custom name" />
           </label>
         </div>
-
-        <label>
-          <span>Tags</span>
-          <input name="tags" type="text" placeholder="nature, neon, abstract" />
-        </label>
 
         <div class="actions">
           <button type="button" class="ghost" onclick={clearFile}>Reset file</button>

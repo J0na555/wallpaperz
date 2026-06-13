@@ -1,5 +1,5 @@
 <script>
-  import { wallpapers } from './lib/data.js';
+  import { onMount } from 'svelte';
   import TopNav from './components/TopNav.svelte';
   import Hero from './components/Hero.svelte';
   import SearchBar from './components/SearchBar.svelte';
@@ -12,6 +12,9 @@
   let searchQuery = $state('');
   let selectedWallpaper = $state(null);
   let isDark = $state(false);
+  let wallpapers = $state([]);
+  let isLoading = $state(true);
+  let loadError = $state('');
 
   // Sync isDark with localStorage and OS preference on mount
   $effect(() => {
@@ -41,6 +44,39 @@
     }
   });
 
+  onMount(() => {
+    const controller = new AbortController();
+
+    async function loadWallpapers() {
+      try {
+        isLoading = true;
+        loadError = '';
+
+        const response = await fetch('/api/wallpapers', {
+          signal: controller.signal,
+        });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error || 'Failed to load wallpapers.');
+        }
+
+        wallpapers = Array.isArray(payload.wallpapers) ? payload.wallpapers : [];
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          loadError = error instanceof Error ? error.message : 'Failed to load wallpapers.';
+          wallpapers = [];
+        }
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    loadWallpapers();
+
+    return () => controller.abort();
+  });
+
   // Toggle theme utility
   function toggleTheme() {
     isDark = !isDark;
@@ -50,10 +86,46 @@
   }
 
   // Derived filtered wallpapers list
+  function getFolderLabel(folder) {
+    const parts = String(folder || '')
+      .split('/')
+      .map(part => part.trim())
+      .filter(Boolean);
+
+    if (parts.length === 0) {
+      return 'Unsorted';
+    }
+
+    return parts[parts.length - 1]
+      .split(/[-_]/g)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  let categories = $derived([
+    { value: 'all', label: 'All' },
+    ...Array.from(
+      new Set(
+        wallpapers
+          .map(wp => wp.folder || wp.category)
+          .filter(Boolean)
+      )
+    ).map(category => ({
+      value: category,
+      label: getFolderLabel(category)
+    }))
+  ]);
+
   let filteredWallpapers = $derived(
     wallpapers.filter(wp => {
-      const matchesCategory = activeCategory === 'all' || wp.category === activeCategory;
-      const matchesSearch = !searchQuery || wp.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+      const categoryKey = wp.folder || wp.category;
+      const matchesCategory = activeCategory === 'all' || categoryKey === activeCategory;
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !searchTerm ||
+        wp.label.toLowerCase().includes(searchTerm) ||
+        (wp.folder || '').toLowerCase().includes(searchTerm) ||
+        (wp.publicId || '').toLowerCase().includes(searchTerm);
       return matchesCategory && matchesSearch;
     })
   );
@@ -70,13 +142,13 @@
 <TopNav {isDark} {toggleTheme} />
 
 <main id="content">
-  <Hero count={filteredWallpapers.length} />
+  <Hero count={wallpapers.length} />
   
   <SearchBar bind:searchQuery />
   
-  <FilterChips bind:activeCategory />
+  <FilterChips bind:activeCategory {categories} />
   
-  <WallpaperGrid wallpapers={filteredWallpapers} onSelect={selectWallpaper} />
+  <WallpaperGrid wallpapers={filteredWallpapers} loading={isLoading} error={loadError} onSelect={selectWallpaper} />
 </main>
 
 <Lightbox wallpaper={selectedWallpaper} onClose={closeLightbox} />

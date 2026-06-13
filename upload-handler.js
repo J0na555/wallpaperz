@@ -17,6 +17,10 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload))
 }
 
+function encodeBasicAuth(username, password) {
+  return Buffer.from(`${username}:${password}`).toString('base64')
+}
+
 function readRequestBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = []
@@ -127,6 +131,64 @@ function buildSignature(params, apiSecret) {
   return createHash('sha1').update(signatureBase + apiSecret).digest('hex')
 }
 
+function getAspectRatio(width, height) {
+  if (!width || !height) return 'landscape'
+
+  const ratio = width / height
+  if (ratio >= 1.5) return 'wide'
+  if (ratio <= 0.8) return 'portrait'
+  if (ratio >= 0.9 && ratio <= 1.1) return 'square'
+  return 'landscape'
+}
+
+function titleCase(value) {
+  return String(value || '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+function getFolderDisplayName(folder) {
+  const parts = String(folder || '')
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  if (parts.length === 0) {
+    return 'Unsorted'
+  }
+
+  return titleCase(parts[parts.length - 1])
+}
+
+function getResourceFolder(resource) {
+  const directFolder =
+    resource.asset_folder ||
+    resource.folder ||
+    resource.assetFolder ||
+    ''
+
+  if (directFolder) {
+    return directFolder
+  }
+
+  const publicIdParts = String(resource.public_id || '')
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  if (publicIdParts.length > 1) {
+    return publicIdParts.slice(0, -1).join('/')
+  }
+
+  return ''
+}
+
+function addCloudinaryTransformation(url, transformation) {
+  return url.replace('/upload/', `/upload/${transformation}/`)
+}
+
 async function uploadToCloudinary({
   cloudName,
   apiKey,
@@ -136,14 +198,12 @@ async function uploadToCloudinary({
   mimeType,
   folder,
   publicId,
-  tags,
 }) {
   const timestamp = String(Math.floor(Date.now() / 1000))
   const paramsToSign = { timestamp }
 
   if (folder) paramsToSign.folder = folder
   if (publicId) paramsToSign.public_id = publicId
-  if (tags) paramsToSign.tags = tags
 
   const signature = buildSignature(paramsToSign, apiSecret)
   const formData = new FormData()
@@ -155,7 +215,6 @@ async function uploadToCloudinary({
 
   if (folder) formData.append('folder', folder)
   if (publicId) formData.append('public_id', publicId)
-  if (tags) formData.append('tags', tags)
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',
@@ -171,6 +230,48 @@ async function uploadToCloudinary({
   return payload
 }
 
+async function listCloudinaryImages({ cloudName, apiKey, apiSecret }) {
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?max_results=100`,
+    {
+      headers: {
+        Authorization: `Basic ${encodeBasicAuth(apiKey, apiSecret)}`,
+      },
+    },
+  )
+
+  const payload = await response.json()
+
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || `Cloudinary list failed with status ${response.status}.`)
+  }
+
+  return (payload.resources || [])
+    .map((resource) => {
+      const folder = getResourceFolder(resource)
+      const category = getFolderDisplayName(folder)
+      const label = resource.display_name || titleCase(resource.public_id.split('/').at(-1) || resource.public_id)
+      const previewUrl = resource.secure_url
+        ? addCloudinaryTransformation(resource.secure_url, 'c_fill,w_900,h_900,g_auto,f_auto,q_auto')
+        : ''
+
+      return {
+        id: resource.asset_id || resource.public_id,
+        label,
+        category,
+        folder,
+        resolution: resource.width && resource.height ? `${resource.width} × ${resource.height}` : 'Unknown size',
+        aspect: getAspectRatio(resource.width, resource.height),
+        imageUrl: resource.secure_url || '',
+        previewUrl: previewUrl || resource.secure_url || '',
+        fullUrl: resource.secure_url || '',
+        publicId: resource.public_id,
+        createdAt: resource.created_at,
+      }
+    })
+    .sort((left, right) => String(right.createdAt || '').localeCompare(String(left.createdAt || '')))
+}
+
 function respondWithUploadRouteInfo(res) {
   sendJson(res, 200, {
     endpoint: '/api/upload',
@@ -179,8 +280,15 @@ function respondWithUploadRouteInfo(res) {
       file: 'multipart/form-data file field',
       folder: 'optional Cloudinary folder',
       publicId: 'optional Cloudinary public_id',
-      tags: 'optional comma-separated tags',
     },
+  })
+}
+
+function respondWithGalleryRouteInfo(res) {
+  sendJson(res, 200, {
+    endpoint: '/api/wallpapers',
+    method: 'GET',
+    source: 'Cloudinary admin resources API',
   })
 }
 
@@ -258,7 +366,6 @@ export function createUploadRequestHandler(env) {
         mimeType: file.mimeType,
         folder: fields.folder || '',
         publicId: fields.publicId || fields.public_id || '',
-        tags: fields.tags || '',
       })
 
       return sendJson(res, 200, {
@@ -275,12 +382,54 @@ export function createUploadRequestHandler(env) {
 
 export function createViteUploadMiddleware(mode) {
   return async function uploadMiddleware(req, res, next) {
-    if (!req.url || !req.url.startsWith('/api/upload')) {
+    if (!req.url || (!req.url.startsWith('/api/upload') && !req.url.startsWith('/api/wallpapers'))) {
       return next()
     }
 
     const { loadEnv } = await import('vite')
     const env = loadEnv(mode, process.cwd(), '')
-    return createUploadRequestHandler(env)(req, res)
+    if (req.url.startsWith('/api/upload')) {
+      return createUploadRequestHandler(env)(req, res)
+    }
+
+    return createGalleryRequestHandler(env)(req, res)
+  }
+}
+
+export function createGalleryRequestHandler(env) {
+  const cloudName = getEnvValue(env, 'CLOUD_NAME', 'CLOUD_NAMA')
+  const apiKey = getEnvValue(env, 'API_KEY')
+  const apiSecret = getEnvValue(env, 'SECRET', 'API_SECRET')
+
+  return async function handleGalleryRequest(req, res) {
+    if (req.method === 'OPTIONS') {
+      res.statusCode = 204
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      return res.end()
+    }
+
+    if (req.method === 'GET') {
+      if (!cloudName || !apiKey || !apiSecret) {
+        return sendJson(res, 500, {
+          error: 'Cloudinary configuration is incomplete.',
+        })
+      }
+
+      try {
+        const wallpapers = await listCloudinaryImages({ cloudName, apiKey, apiSecret })
+        return sendJson(res, 200, {
+          wallpapers,
+        })
+      } catch (error) {
+        return sendJson(res, 500, {
+          error: error instanceof Error ? error.message : 'Failed to load wallpapers.',
+        })
+      }
+    }
+
+    res.setHeader('Allow', 'GET, OPTIONS')
+    return sendJson(res, 405, { error: 'Method not allowed.' })
   }
 }

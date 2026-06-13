@@ -1,15 +1,5 @@
 <script>
-  let { activeCategory = $bindable() } = $props();
-
-  const categories = [
-    { value: 'all', label: 'All' },
-    { value: 'nature', label: 'Nature' },
-    { value: 'abstract', label: 'Abstract' },
-    { value: 'space', label: 'Space' },
-    { value: 'cyberpunk', label: 'Cyberpunk' },
-    { value: 'minimal', label: 'Minimal' },
-    { value: 'city', label: 'City' }
-  ];
+  let { activeCategory = $bindable(), categories = [] } = $props();
 </script>
 
 <section style="padding-bottom: var(--gap-xl);">

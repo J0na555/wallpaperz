@@ -30,8 +30,24 @@
 
   function handleDownload(event) {
     event.stopPropagation();
+
+    const sourceUrl = wallpaper.fullUrl || wallpaper.imageUrl;
+    if (!sourceUrl) {
+      return;
+    }
+
+    const downloadUrl = sourceUrl.replace('/upload/', '/upload/fl_attachment/');
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${wallpaper.label || 'wallpaper'}.jpg`;
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
     downloaded = true;
-    setTimeout(() => {
+    window.setTimeout(() => {
       downloaded = false;
     }, 1500);
   }
@@ -60,15 +76,22 @@
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
-    <div 
-      class="lightbox-image-placeholder {wallpaper.class}" 
-      style="aspect-ratio: {getAspectRatio(wallpaper.aspect)};"
-    ></div>
+    {#if wallpaper.fullUrl || wallpaper.imageUrl}
+      <img
+        class="lightbox-image"
+        src={wallpaper.fullUrl || wallpaper.imageUrl}
+        alt={wallpaper.label}
+        style="aspect-ratio: {getAspectRatio(wallpaper.aspect)};"
+      />
+    {:else}
+      <div
+        class="lightbox-image-placeholder {wallpaper.class}"
+        style="aspect-ratio: {getAspectRatio(wallpaper.aspect)};"
+      ></div>
+    {/if}
     <div class="lightbox-info">
       <div class="card-tags">
-        {#each wallpaper.tags as tag}
-          <span class="card-tag">{tag}</span>
-        {/each}
+        <span class="card-tag">{wallpaper.category}</span>
       </div>
       <div class="card-resolution">{wallpaper.resolution}</div>
     </div>
@@ -123,6 +146,14 @@
     width: 640px;
     aspect-ratio: 16 / 10;
   }
+  .lightbox-image {
+    max-width: 85vw;
+    max-height: 70vh;
+    border-radius: var(--radius-lg);
+    width: min(960px, 85vw);
+    object-fit: cover;
+    display: block;
+  }
   .lightbox-info {
     margin-top: var(--gap-md);
     text-align: center;
@@ -139,11 +170,6 @@
     font-size: 11px;
     color: var(--muted);
     letter-spacing: 0.01em;
-  }
-  .card-tag + .card-tag::before {
-    content: '·';
-    margin-right: 6px;
-    color: var(--border);
   }
   .card-resolution {
     font-family: var(--font-mono);

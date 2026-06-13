@@ -22,13 +22,15 @@
         onclick={toggleTheme} 
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
+        <span class="theme-icon-stack" aria-hidden="true">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </span>
       </button>
     </nav>
   </div>
@@ -92,24 +94,38 @@
   .theme-btn:hover {
     color: var(--fg);
   }
-  .theme-btn svg {
+  .theme-icon-stack {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .theme-icon-stack svg {
+    position: absolute;
     width: 18px;
     height: 18px;
     display: block;
+    transition: opacity 0.18s ease, transform 0.18s ease;
   }
 
   .icon-moon {
-    display: none;
+    opacity: 0;
+    transform: scale(0.7) rotate(-20deg);
   }
   .icon-sun {
-    display: block;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 
   :global(.theme-dark) .icon-sun {
-    display: none;
+    opacity: 0;
+    transform: scale(0.7) rotate(20deg);
   }
   :global(.theme-dark) .icon-moon {
-    display: block;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 
   @media (max-width: 920px) {

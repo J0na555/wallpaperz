@@ -9,16 +9,21 @@
   style="animation-delay: {index * 0.05}s;"
   onclick={() => onSelect(wallpaper)}
 >
-  <div 
-    class="card-img {wallpaper.aspect} {wallpaper.class}" 
-    role="img" 
-    aria-label="{wallpaper.label} wallpaper"
-  ></div>
+  <div class="card-media {wallpaper.aspect}">
+    {#if wallpaper.previewUrl || wallpaper.imageUrl}
+      <img
+        class="card-img"
+        src={wallpaper.previewUrl || wallpaper.imageUrl}
+        alt={wallpaper.label}
+        loading="lazy"
+      />
+    {:else}
+      <div class="card-img {wallpaper.class}" role="img" aria-label="{wallpaper.label} wallpaper"></div>
+    {/if}
+  </div>
   <div class="card-info">
     <div class="card-tags">
-      {#each wallpaper.tags.slice(0, 3) as tag}
-        <span class="card-tag">{tag}</span>
-      {/each}
+      <span class="card-tag">{wallpaper.category}</span>
     </div>
     <div class="card-meta">
       <span class="card-resolution">{wallpaper.resolution}</span>
@@ -50,10 +55,18 @@
     display: block;
     aspect-ratio: auto;
   }
+  .card-media {
+    overflow: hidden;
+  }
   .card-img.portrait { aspect-ratio: 3 / 4; }
   .card-img.landscape { aspect-ratio: 16 / 10; }
   .card-img.square { aspect-ratio: 1 / 1; }
   .card-img.wide { aspect-ratio: 21 / 9; }
+  .card-media img.card-img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
 
   .card-info {
     padding: 14px 16px;
@@ -68,11 +81,6 @@
     font-size: 11px;
     color: var(--muted);
     letter-spacing: 0.01em;
-  }
-  .card-tag + .card-tag::before {
-    content: '·';
-    margin-right: 6px;
-    color: var(--border);
   }
   .card-meta {
     display: flex;
