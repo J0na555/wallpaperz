@@ -1,14 +1,12 @@
-<section id="about">
-  <footer class="pagefoot">
-    <div class="container pagefoot-inner">
-      <div class="foot-left">
-        <p class="foot-copy">
-          © 2026 <a href="https://github.com/J0na555" target="_blank" rel="noopener noreferrer" class="link-accent">Jonas</a>
-        </p>
-      </div>
+<footer class="pagefoot">
+  <div class="container pagefoot-inner">
+    <div class="foot-left">
+      <p class="foot-copy">
+        © 2026 <a href="https://github.com/J0na555" target="_blank" rel="noopener noreferrer" class="link-accent">Jonas</a>
+      </p>
     </div>
-  </footer>
-</section>
+  </div>
+</footer>
 
 <style>
   .pagefoot {

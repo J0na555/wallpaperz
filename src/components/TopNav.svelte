@@ -15,7 +15,6 @@
     <nav>
       <a href="#gallery">Collections</a>
       <a href="#search">Search</a>
-      <a href="#about">About</a>
       <button 
         type="button" 
         class="theme-btn" 
