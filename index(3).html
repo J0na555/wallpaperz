@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wallpapers — Jonas</title>
+  <style>
+    :root {
+      --bg:      #ffffff;
+      --surface: #f8f8f8;
+      --fg:      #1a1a1a;
+      --muted:   #888888;
+      --border:  #e5e5e5;
+      --accent:  #1a1a1a;
+      --accent-soft: rgba(26,26,26,0.08);
+
+      --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+
+      --fs-h1: clamp(36px, 5vw, 64px);
+      --fs-h2: clamp(26px, 3.2vw, 40px);
+      --fs-h3: 18px;
+      --fs-lead: 17px;
+      --fs-body: 15px;
+      --fs-meta: 12px;
+
+      --gap-xs: 8px;
+      --gap-sm: 12px;
+      --gap-md: 20px;
+      --gap-lg: 32px;
+      --gap-xl: 56px;
+      --gap-2xl: 80px;
+      --container: 68rem;
+      --gutter: 24px;
+
+      --radius: 6px;
+      --radius-lg: 10px;
+
+      --nav-bg: rgba(255,255,255,0.9);
+      --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      --card-border-hover: rgba(26,26,26,0.15);
+      --lightbox-bg: rgba(255,255,255,0.85);
+      --lightbox-close-border: rgba(26,26,26,0.15);
+      --chip-hover-border: rgba(26,26,26,0.3);
+      --search-focus-border: rgba(26,26,26,0.3);
+    }
+
+    .theme-dark {
+      --bg:      #0c0c0c;
+      --surface: #161616;
+      --fg:      #e8e8e8;
+      --muted:   #777777;
+      --border:  #222222;
+      --accent:  #e8e8e8;
+      --accent-soft: rgba(232,232,232,0.08);
+
+      --nav-bg: rgba(12,12,12,0.9);
+      --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --card-border-hover: rgba(232,232,232,0.15);
+      --lightbox-bg: rgba(12,12,12,0.85);
+      --lightbox-close-border: rgba(232,232,232,0.25);
+      --chip-hover-border: rgba(232,232,232,0.3);
+      --search-focus-border: rgba(232,232,232,0.3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not(.theme-light) {
+        --bg:      #0c0c0c;
+        --surface: #161616;
+        --fg:      #e8e8e8;
+        --muted:   #777777;
+        --border:  #222222;
+        --accent:  #e8e8e8;
+        --accent-soft: rgba(232,232,232,0.08);
+        --nav-bg: rgba(12,12,12,0.9);
+        --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        --card-border-hover: rgba(232,232,232,0.15);
+        --lightbox-bg: rgba(12,12,12,0.85);
+        --lightbox-close-border: rgba(232,232,232,0.25);
+        --chip-hover-border: rgba(232,232,232,0.3);
+        --search-focus-border: rgba(232,232,232,0.3);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-body);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    img, svg { max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    p { text-wrap: pretty; }
+    h1, h2, h3, h4 { text-wrap: balance; margin: 0; font-family: var(--font-display); }
+
+    .container {
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+    .section {
+      padding-block: clamp(48px, 8vw, var(--gap-2xl));
+    }
+
+    /* ─── nav ──────────────────────────────────────────────────────────── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transform: translateY(-100%);
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .topnav.visible { transform: translateY(0); }
+    .topnav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-block: 14px;
+    }
+    .topnav .logo {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+    }
+    .topnav nav { display: flex; align-items: center; gap: var(--gap-lg); }
+    .topnav nav a {
+      font-size: 13px;
+      color: var(--muted);
+      transition: color 0.15s ease;
+    }
+    .topnav nav a:hover { color: var(--fg); }
+
+    /* theme toggle */
+    .theme-btn {
+      background: none;
+      border: none;
+      padding: 6px;
+      color: var(--muted);
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: color 0.15s ease;
+    }
+    .theme-btn:hover { color: var(--fg); }
+    .theme-btn svg { width: 18px; height: 18px; display: block; }
+    .theme-btn .icon-moon { display: none; }
+    .theme-dark .theme-btn .icon-sun { display: none; }
+    .theme-dark .theme-btn .icon-moon { display: block; }
+
+    /* ─── hero ─────────────────────────────────────────────────────────── */
+    .hero {
+      padding-top: clamp(120px, 18vw, 220px);
+      padding-bottom: clamp(32px, 5vw, 60px);
+      text-align: center;
+    }
+    .hero .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--gap-md);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--fs-h1);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      margin-bottom: var(--gap-md);
+    }
+    .hero .lead {
+      font-size: var(--fs-lead);
+      color: var(--muted);
+      max-width: 42ch;
+      margin: 0 auto var(--gap-md);
+      line-height: 1.6;
+    }
+    .link-accent {
+      color: var(--fg);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: border-color 0.15s ease;
+    }
+    .link-accent:hover { border-color: var(--fg); }
+    .hero .status-pill {
+      display: inline-block;
+      margin-top: var(--gap-md);
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    .hero-divider {
+      width: 48px;
+      height: 1px;
+      background: var(--border);
+      margin: var(--gap-xl) auto 0;
+    }
+
+    /* ─── search ───────────────────────────────────────────────────────── */
+    .search-wrap {
+      max-width: 420px;
+      margin: 0 auto var(--gap-xl);
+      position: relative;
+    }
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted);
+      width: 15px; height: 15px;
+      pointer-events: none;
+    }
+    .search-wrap .search-icon svg {
+      display: block; width: 100%; height: 100%;
+    }
+    .search-input {
+      width: 100%;
+      padding: 11px 16px 11px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--search-focus-border); }
+
+    /* ─── filters ──────────────────────────────────────────────────────── */
+    .filters {
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-xl);
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      transition: all 0.15s ease;
+    }
+    .filter-chip:hover { border-color: var(--chip-hover-border); color: var(--fg); }
+    .filter-chip.active {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    /* ─── masonry grid ─────────────────────────────────────────────────── */
+    .masonry {
+      columns: 3;
+      column-gap: var(--gap-md);
+    }
+    @media (max-width: 920px) { .masonry { columns: 2; } }
+    @media (max-width: 560px) { .masonry { columns: 1; } }
+
+    /* ─── wallpaper card ───────────────────────────────────────────────── */
+    .wallpaper-card {
+      break-inside: avoid;
+      margin-bottom: var(--gap-md);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      animation: cardIn 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+    .wallpaper-card:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--card-hover-shadow);
+    }
+    .wallpaper-card .card-img {
+      width: 100%;
+      display: block;
+      aspect-ratio: auto;
+    }
+    .wallpaper-card .card-img.portrait { aspect-ratio: 3 / 4; }
+    .wallpaper-card .card-img.landscape { aspect-ratio: 16 / 10; }
+    .wallpaper-card .card-img.square { aspect-ratio: 1 / 1; }
+    .wallpaper-card .card-img.wide { aspect-ratio: 21 / 9; }
+
+    .wallpaper-card .card-info {
+      padding: 14px 16px;
+    }
+    .wallpaper-card .card-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .wallpaper-card .card-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+    .wallpaper-card .card-tag + .card-tag::before {
+      content: '·';
+      margin-right: 6px;
+      color: var(--border);
+    }
+    .wallpaper-card .card-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px;
+    }
+    .wallpaper-card .card-resolution {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ─── card click hint ──────────────────────────────────────────────── */
+    .wallpaper-card::after {
+      content: 'Click to view';
+      position: absolute;
+      bottom: 12px; right: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      background: var(--nav-bg);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .wallpaper-card:hover::after { opacity: 1; }
+
+    /* ─── card entrance animation ──────────────────────────────────────── */
+    .wallpaper-card:nth-child(1)  { animation-delay: 0.0s; }
+    .wallpaper-card:nth-child(2)  { animation-delay: 0.05s; }
+    .wallpaper-card:nth-child(3)  { animation-delay: 0.1s; }
+    .wallpaper-card:nth-child(4)  { animation-delay: 0.15s; }
+    .wallpaper-card:nth-child(5)  { animation-delay: 0.2s; }
+    .wallpaper-card:nth-child(6)  { animation-delay: 0.25s; }
+    .wallpaper-card:nth-child(7)  { animation-delay: 0.3s; }
+    .wallpaper-card:nth-child(8)  { animation-delay: 0.35s; }
+    .wallpaper-card:nth-child(9)  { animation-delay: 0.4s; }
+    .wallpaper-card:nth-child(10) { animation-delay: 0.45s; }
+    .wallpaper-card:nth-child(11) { animation-delay: 0.5s; }
+    .wallpaper-card:nth-child(12) { animation-delay: 0.55s; }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── lightbox ─────────────────────────────────────────────────────── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--lightbox-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .lightbox.open { opacity: 1; pointer-events: auto; }
+    .lightbox-image-placeholder {
+      max-width: 85vw; max-height: 70vh;
+      border-radius: var(--radius-lg);
+      width: 640px; aspect-ratio: 16 / 10;
+    }
+    .lightbox-info {
+      margin-top: var(--gap-md);
+      text-align: center;
+    }
+    .lightbox-info .card-tags { justify-content: center; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .lightbox-info .card-resolution {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .lightbox-actions {
+      margin-top: var(--gap-md);
+      display: flex; gap: var(--gap-sm);
+    }
+    .lightbox-download {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 22px;
+      background: var(--fg);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+    .lightbox-download:hover { opacity: 0.85; }
+    .lightbox-download:active { transform: scale(0.97); }
+    .lightbox-download svg { width: 15px; height: 15px; display: block; }
+    .lightbox-close {
+      position: absolute; top: 24px; right: 24px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .lightbox-close:hover { color: var(--fg); border-color: var(--lightbox-close-border); }
+    .lightbox-close svg { width: 16px; height: 16px; display: block; }
+
+    /* ─── footer ───────────────────────────────────────────────────────── */
+    .pagefoot {
+      padding-block: var(--gap-xl);
+      border-top: 1px solid var(--border);
+      margin-top: var(--gap-2xl);
+    }
+    .pagefoot-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: var(--gap-md);
+    }
+    .pagefoot .foot-left { display: flex; flex-direction: column; gap: 8px; }
+    .pagefoot .foot-copy {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ─── wallpaper image placeholders (abstract gradients) ────────────── */
+    .wp-1 { background: linear-gradient(160deg, #0f2027, #203a43, #2c5364); }
+    .wp-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+    .wp-3 { background: linear-gradient(180deg, #2d1b69, #11001c); }
+    .wp-4 { background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #e94560); }
+    .wp-5 { background: linear-gradient(160deg, #141e30, #243b55); }
+    .wp-6 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    .wp-7 { background: linear-gradient(180deg, #1f1c2c, #928dab); }
+    .wp-8 { background: linear-gradient(135deg, #000428, #004e92); }
+    .wp-9 { background: linear-gradient(160deg, #200122, #6f0000); }
+    .wp-10 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
+    .wp-11 { background: linear-gradient(180deg, #1a1a2e, #e94560, #0f3460); }
+    .wp-12 { background: linear-gradient(135deg, #0c0c0c, #1db954); }
+
+    /* ─── responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 920px) {
+      .topnav nav { gap: var(--gap-md); }
+      .hero h1 { font-size: clamp(32px, 8vw, 48px); }
+    }
+    @media (max-width: 560px) {
+      .topnav nav a { font-size: 12px; }
+      .filters { gap: 6px; }
+      .filter-chip { padding: 6px 12px; font-size: 11px; }
+      .pagefoot-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav" id="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <span class="logo">Wallpapers</span>
+      <nav>
+        <a href="#gallery">Collections</a>
+        <a href="#search">Search</a>
+        <a href="#about">About</a>
+        <button type="button" class="theme-btn" aria-label="Switch to dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section hero" data-od-id="hero">
+      <div class="container">
+        <p class="eyebrow">Curated · Dark · High-Resolution</p>
+        <h1>Wallpapers</h1>
+        <p class="lead">A curated collection of wallpapers I love. Click any image to preview and download in full resolution.</p>
+        <span class="status-pill">12 wallpapers</span>
+        <div class="hero-divider"></div>
+      </div>
+    </section>
+
+    <section data-od-id="search" id="search" style="padding-bottom: var(--gap-lg);">
+      <div class="container">
+        <div class="search-wrap">
+          <span class="search-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search wallpapers by tag..." />
+        </div>
+      </div>
+    </section>
+
+    <section data-od-id="filters" style="padding-bottom: var(--gap-xl);">
+      <div class="container">
+        <div class="filters" id="filters">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="nature">Nature</button>
+          <button class="filter-chip" data-filter="abstract">Abstract</button>
+          <button class="filter-chip" data-filter="space">Space</button>
+          <button class="filter-chip" data-filter="cyberpunk">Cyberpunk</button>
+          <button class="filter-chip" data-filter="minimal">Minimal</button>
+          <button class="filter-chip" data-filter="city">City</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="gallery" id="gallery" style="padding-top: 0;">
+      <div class="container">
+        <div class="masonry" id="wallpaperGrid">
+
+          <div class="wallpaper-card" data-tags="nature ocean sunset landscape" data-category="nature" data-resolution="3840 × 2160" data-label="Ocean sunset">
+            <div class="card-img landscape wp-1" role="img" aria-label="Ocean sunset wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">nature</span>
+                <span class="card-tag">ocean</span>
+                <span class="card-tag">sunset</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="abstract gradient purple minimal" data-category="abstract" data-resolution="2160 × 3840" data-label="Purple gradient">
+            <div class="card-img portrait wp-3" role="img" aria-label="Purple gradient wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">abstract</span>
+                <span class="card-tag">purple</span>
+                <span class="card-tag">minimal</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">2160 × 3840</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="cyberpunk neon city rain night" data-category="cyberpunk" data-resolution="3840 × 2160" data-label="Cyberpunk city">
+            <div class="card-img landscape wp-4" role="img" aria-label="Cyberpunk city wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">cyberpunk</span>
+                <span class="card-tag">neon</span>
+                <span class="card-tag">rain</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="space stars nebula galaxy" data-category="space" data-resolution="2560 × 2560" data-label="Nebula">
+            <div class="card-img square wp-6" role="img" aria-label="Nebula wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">space</span>
+                <span class="card-tag">nebula</span>
+                <span class="card-tag">galaxy</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">2560 × 2560</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="nature mountain fog forest" data-category="nature" data-resolution="3840 × 2160" data-label="Mountain fog">
+            <div class="card-img landscape wp-5" role="img" aria-label="Mountain fog wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">nature</span>
+                <span class="card-tag">mountain</span>
+                <span class="card-tag">fog</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="minimal geometric black white" data-category="minimal" data-resolution="2160 × 3840" data-label="Minimal geometric">
+            <div class="card-img portrait wp-10" role="img" aria-label="Minimal geometric wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">minimal</span>
+                <span class="card-tag">geometric</span>
+                <span class="card-tag">monochrome</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">2160 × 3840</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="city skyline night urban" data-category="city" data-resolution="5120 × 2160" data-label="City skyline">
+            <div class="card-img wide wp-2" role="img" aria-label="City skyline wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">city</span>
+                <span class="card-tag">skyline</span>
+                <span class="card-tag">night</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">5120 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="abstract fluid color gradient" data-category="abstract" data-resolution="3840 × 2160" data-label="Abstract fluid">
+            <div class="card-img landscape wp-7" role="img" aria-label="Abstract fluid wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">abstract</span>
+                <span class="card-tag">fluid</span>
+                <span class="card-tag">gradient</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="space planets cosmic dark" data-category="space" data-resolution="2160 × 3840" data-label="Cosmic planets">
+            <div class="card-img portrait wp-9" role="img" aria-label="Cosmic wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">space</span>
+                <span class="card-tag">planets</span>
+                <span class="card-tag">cosmic</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">2160 × 3840</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="cyberpunk purple neon street" data-category="cyberpunk" data-resolution="3840 × 2160" data-label="Cyberpunk street">
+            <div class="card-img landscape wp-11" role="img" aria-label="Cyberpunk street wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">cyberpunk</span>
+                <span class="card-tag">purple</span>
+                <span class="card-tag">neon</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="minimal clean white abstract" data-category="minimal" data-resolution="2560 × 2560" data-label="Minimal blue">
+            <div class="card-img square wp-8" role="img" aria-label="Minimal blue wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">minimal</span>
+                <span class="card-tag">clean</span>
+                <span class="card-tag">blue</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">2560 × 2560</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="wallpaper-card" data-tags="nature aurora northern lights" data-category="nature" data-resolution="3840 × 2160" data-label="Aurora">
+            <div class="card-img landscape wp-12" role="img" aria-label="Aurora wallpaper"></div>
+            <div class="card-info">
+              <div class="card-tags">
+                <span class="card-tag">nature</span>
+                <span class="card-tag">aurora</span>
+                <span class="card-tag">night</span>
+              </div>
+              <div class="card-meta">
+                <span class="card-resolution">3840 × 2160</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="lightbox-image-placeholder" id="lightboxPlaceholder"></div>
+    <div class="lightbox-info">
+      <div class="card-tags" id="lightboxTags"></div>
+      <div class="card-resolution" id="lightboxResolution"></div>
+    </div>
+    <div class="lightbox-actions">
+      <button class="lightbox-download" id="lightboxDownload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Full Resolution
+      </button>
+    </div>
+  </div>
+
+  <footer class="pagefoot" data-od-id="footer" id="about">
+    <div class="container pagefoot-inner">
+      <div class="foot-left">
+        <p class="foot-copy">© 2026 <a href="https://github.com/J0na555" target="_blank" rel="noopener noreferrer" class="link-accent">Jonas</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    var THEME_KEY = 'theme';
+    var root = document.documentElement;
+
+    function applyTheme(dark) {
+      root.classList.toggle('theme-dark', dark);
+      var label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+      document.querySelectorAll('.theme-btn').forEach(function(b) { b.setAttribute('aria-label', label); });
+    }
+
+    var stored = localStorage.getItem(THEME_KEY);
+    var prefersDark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(prefersDark);
+
+    document.querySelectorAll('.theme-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var isDark = !root.classList.contains('theme-dark');
+        localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+        applyTheme(isDark);
+      });
+    });
+
+    var topnav = document.getElementById('topnav');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 200) {
+        topnav.classList.add('visible');
+      } else {
+        topnav.classList.remove('visible');
+      }
+    }, { passive: true });
+
+    var filterBtns = document.querySelectorAll('.filter-chip');
+    var cards = document.querySelectorAll('.wallpaper-card');
+
+    filterBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        filterBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var cat = btn.dataset.filter;
+        cards.forEach(function(card) {
+          card.style.display = (cat === 'all' || card.dataset.category === cat) ? '' : 'none';
+        });
+      });
+    });
+
+    var searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+      var q = searchInput.value.toLowerCase().trim();
+      filterBtns.forEach(function(b) { b.classList.remove('active'); });
+      filterBtns[0].classList.add('active');
+      cards.forEach(function(card) {
+        var tags = card.dataset.tags || '';
+        card.style.display = (!q || tags.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+
+    var lightbox = document.getElementById('lightbox');
+    var lightboxPlaceholder = document.getElementById('lightboxPlaceholder');
+    var lightboxTags = document.getElementById('lightboxTags');
+    var lightboxResolution = document.getElementById('lightboxResolution');
+    var lightboxDownload = document.getElementById('lightboxDownload');
+    var lightboxClose = document.getElementById('lightboxClose');
+    var currentCard = null;
+
+    var wpClasses = {};
+    document.querySelectorAll('[class*="wp-"]').forEach(function(el) {
+      var match = el.className.match(/wp-(\d+)/);
+      if (match) {
+        wpClasses['wp-' + match[1]] = getComputedStyle(el).background;
+      }
+    });
+
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        currentCard = card;
+        var resolution = card.dataset.resolution || '';
+        var tags = (card.dataset.tags || '').split(' ').filter(Boolean);
+
+        var imgEl = card.querySelector('[class*="wp-"]');
+        var bg = '';
+        if (imgEl) {
+          var m = imgEl.className.match(/wp-(\d+)/);
+          if (m) bg = wpClasses['wp-' + m[1]] || getComputedStyle(imgEl).background;
+        }
+
+        lightboxPlaceholder.style.background = bg;
+        lightboxPlaceholder.style.width = '640px';
+
+        if (imgEl) {
+          if (imgEl.classList.contains('portrait')) lightboxPlaceholder.style.aspectRatio = '3 / 4';
+          else if (imgEl.classList.contains('wide')) lightboxPlaceholder.style.aspectRatio = '21 / 9';
+          else if (imgEl.classList.contains('square')) lightboxPlaceholder.style.aspectRatio = '1 / 1';
+          else lightboxPlaceholder.style.aspectRatio = '16 / 10';
+        }
+
+        lightboxTags.innerHTML = tags.map(function(t) { return '<span class="card-tag">' + t + '</span>'; }).join('');
+        lightboxResolution.textContent = resolution;
+
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+      currentCard = null;
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function(e) {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    lightboxDownload.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var original = lightboxDownload.innerHTML;
+      lightboxDownload.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;display:block"><polyline points="20 6 9 17 4 12"/></svg> Saved';
+      lightboxDownload.style.background = 'var(--accent)';
+      lightboxDownload.style.color = 'var(--bg)';
+      setTimeout(function() {
+        lightboxDownload.innerHTML = original;
+        lightboxDownload.style.background = '';
+        lightboxDownload.style.color = '';
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

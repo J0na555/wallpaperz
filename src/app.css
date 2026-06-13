@@ -1,0 +1,120 @@
+:root {
+  --bg:      #ffffff;
+  --surface: #f8f8f8;
+  --fg:      #1a1a1a;
+  --muted:   #888888;
+  --border:  #e5e5e5;
+  --accent:  #1a1a1a;
+  --accent-soft: rgba(26,26,26,0.08);
+
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+
+  --fs-h1: clamp(36px, 5vw, 64px);
+  --fs-h2: clamp(26px, 3.2vw, 40px);
+  --fs-h3: 18px;
+  --fs-lead: 17px;
+  --fs-body: 15px;
+  --fs-meta: 12px;
+
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 20px;
+  --gap-lg: 32px;
+  --gap-xl: 56px;
+  --gap-2xl: 80px;
+  --container: 68rem;
+  --gutter: 24px;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  --nav-bg: rgba(255,255,255,0.9);
+  --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  --card-border-hover: rgba(26,26,26,0.15);
+  --lightbox-bg: rgba(255,255,255,0.85);
+  --lightbox-close-border: rgba(26,26,26,0.15);
+  --chip-hover-border: rgba(26,26,26,0.3);
+  --search-focus-border: rgba(26,26,26,0.3);
+}
+
+.theme-dark {
+  --bg:      #0c0c0c;
+  --surface: #161616;
+  --fg:      #e8e8e8;
+  --muted:   #777777;
+  --border:  #222222;
+  --accent:  #e8e8e8;
+  --accent-soft: rgba(232,232,232,0.08);
+
+  --nav-bg: rgba(12,12,12,0.9);
+  --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --card-border-hover: rgba(232,232,232,0.15);
+  --lightbox-bg: rgba(12,12,12,0.85);
+  --lightbox-close-border: rgba(232,232,232,0.25);
+  --chip-hover-border: rgba(232,232,232,0.3);
+  --search-focus-border: rgba(232,232,232,0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.theme-light) {
+    --bg:      #0c0c0c;
+    --surface: #161616;
+    --fg:      #e8e8e8;
+    --muted:   #777777;
+    --border:  #222222;
+    --accent:  #e8e8e8;
+    --accent-soft: rgba(232,232,232,0.08);
+    --nav-bg: rgba(12,12,12,0.9);
+    --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --card-border-hover: rgba(232,232,232,0.15);
+    --lightbox-bg: rgba(12,12,12,0.85);
+    --lightbox-close-border: rgba(232,232,232,0.25);
+    --chip-hover-border: rgba(232,232,232,0.3);
+    --search-focus-border: rgba(232,232,232,0.3);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+img, svg { max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+p { text-wrap: pretty; }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; font-family: var(--font-display); }
+
+.container {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.section {
+  padding-block: clamp(48px, 8vw, var(--gap-2xl));
+}
+
+/* ─── wallpaper image placeholders (abstract gradients) ────────────── */
+.wp-1 { background: linear-gradient(160deg, #0f2027, #203a43, #2c5364); }
+.wp-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+.wp-3 { background: linear-gradient(180deg, #2d1b69, #11001c); }
+.wp-4 { background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #e94560); }
+.wp-5 { background: linear-gradient(160deg, #141e30, #243b55); }
+.wp-6 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+.wp-7 { background: linear-gradient(180deg, #1f1c2c, #928dab); }
+.wp-8 { background: linear-gradient(135deg, #000428, #004e92); }
+.wp-9 { background: linear-gradient(160deg, #200122, #6f0000); }
+.wp-10 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
+.wp-11 { background: linear-gradient(180deg, #1a1a2e, #e94560, #0f3460); }
+.wp-12 { background: linear-gradient(135deg, #0c0c0c, #1db954); }
