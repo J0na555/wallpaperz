@@ -5,7 +5,7 @@
 <section class="section hero">
   <div class="container">
     <p class="eyebrow">Curated · Dark · High-Resolution</p>
-    <h1>Wallpapers</h1>
+    <h1>Wallpaperz</h1>
     <p class="lead">A curated collection of wallpapers I love. Click any image to preview and download in full resolution.</p>
     <span class="status-pill">{count} {count === 1 ? 'wallpaper' : 'wallpapers'}</span>
     <div class="hero-divider"></div>

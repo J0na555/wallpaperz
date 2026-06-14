@@ -11,7 +11,7 @@
 
 <header class="topnav" class:visible>
   <div class="container topnav-inner">
-    <span class="logo">Wallpapers</span>
+    <span class="logo">Wallpaperz</span>
     <nav>
       <a href="#gallery">Collections</a>
       <a href="#search">Search</a>

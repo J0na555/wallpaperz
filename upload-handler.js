@@ -230,9 +230,15 @@ async function uploadToCloudinary({
   return payload
 }
 
-async function listCloudinaryImages({ cloudName, apiKey, apiSecret }) {
+async function fetchCloudinaryResourcesPage({ cloudName, apiKey, apiSecret, nextCursor = '' }) {
+  const params = new URLSearchParams({ max_results: '500' })
+
+  if (nextCursor) {
+    params.set('next_cursor', nextCursor)
+  }
+
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?max_results=100`,
+    `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?${params.toString()}`,
     {
       headers: {
         Authorization: `Basic ${encodeBasicAuth(apiKey, apiSecret)}`,
@@ -246,7 +252,29 @@ async function listCloudinaryImages({ cloudName, apiKey, apiSecret }) {
     throw new Error(payload?.error?.message || `Cloudinary list failed with status ${response.status}.`)
   }
 
-  return (payload.resources || [])
+  return {
+    resources: payload.resources || [],
+    nextCursor: payload.next_cursor || '',
+  }
+}
+
+async function listCloudinaryImages({ cloudName, apiKey, apiSecret }) {
+  const resources = []
+  let nextCursor = ''
+
+  do {
+    const page = await fetchCloudinaryResourcesPage({
+      cloudName,
+      apiKey,
+      apiSecret,
+      nextCursor,
+    })
+
+    resources.push(...page.resources)
+    nextCursor = page.nextCursor
+  } while (nextCursor)
+
+  return resources
     .map((resource) => {
       const folder = getResourceFolder(resource)
       const category = getFolderDisplayName(folder)
